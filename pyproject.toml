@@ -6,5 +6,6 @@ authors = ["Your Name <you@example.com>"]
 requires-python = ">=3.11"
 dependencies = [
     "litellm>=1.53.7",
+    "requests>=2.32.3",
     "streamlit>=1.40.2",
 ]

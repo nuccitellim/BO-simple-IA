@@ -1,10 +1,17 @@
 import streamlit as st
-from litellm import completion
 import os
+import requests
+import json
 
-my_secret = os.environ['GROQ_API_KEY']
+def decodificar_json(objeto):
+    """ Recibe objeto json y retorna campo respuesta"""
+    response_str = response.content.decode('utf-8')
+    response_dict = json.loads(response_str)
+    answer = response_dict['answer']
+    return answer
 
-# asignamos la API KEY a la variable my_secret
+
+my_secret = os.environ['DIFY_API_KEY']
 
 # Título
 st.title("Boletín Oficial Simple")
@@ -30,29 +37,30 @@ st.write(
     "Por favor, copia el texto de la norma que deseas simplificar y luego pega el contenido aquí."
 )
 
-# probar este si no funciona el siguiente
-# st.text_area(label="Texto de la norma:",
-# placeholder="Pegue el texto de la norma aquí.")
-
 # Campo de entrada para la norma
 norma = st.text_area("Pega la norma aquí:", height=300)
-
-# print(norma)
 
 # Crear un botón para enviar el mensaje
 if st.button("Generar resumen"):
     # Si el botón es presionado, mostrar el texto ingresado en la sección de resultado
     st.write("### Resultado:")
-    # Llamar a la función completion de litellm
-    response = completion(
-        model="groq/llama3-8b-8192",
-        messages=[{
-            "role": "user",
-            "content": norma
-        }],
-    )
+    base_url = "https://api.dify.ai/v1"
+    path = "/completion-messages"
+    full_path = base_url + path
+    headers = {
+        "Authorization": f"Bearer {my_secret}",
+        "Content-Type": "application/json"
+    }
+    data = {
+        "inputs": {
+            "topic": f"Bearer {norma}"
+        },
+        "response_mode": "blocking",
+        "user": "m-nuccitelli@hotmail.com"
+    }
 
-#st.write(response) print(response)
+    response = requests.post(full_path, json=data, headers=headers)
 
-# Mostrar la respuesta generada por el modelo en un campo de texto
-st.write(response.choices[0].message.content, height=200)
+    # Mostrar la respuesta generada por el modelo en un campo de texto
+    answer = decodificar_json(response)
+    st.write(answer, height=200)
