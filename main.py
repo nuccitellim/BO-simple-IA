@@ -3,6 +3,8 @@ import streamlit as st
 import os
 import requests
 import json
+import urllib.parse  # Para codificar la URL
+import streamlit.components.v1 as components  # Para el botón de copiar
 
 my_secret = os.environ['DIFY_API_KEY']
 
@@ -53,6 +55,30 @@ st.markdown("""
         align-items: center;
         margin-top: 50px;
         font-size: 1.2em;
+    }
+    .share-container {
+        display: flex;
+        justify-content: center; /* Centrar botones */
+        gap: 15px; /* Espaciado entre botones */
+        margin-top: 20px;
+    }
+    .button-share {
+        background-color: #ffffff; /* Fondo blanco */
+        border: 1px solid #d1d1d1; /* Borde gris claro */
+        border-radius: 5px;
+        color: #333; /* Color del texto */
+        padding: 10px 20px; /* Tamaño del botón */
+        font-size: 0.9em; /* Tipografía acorde con el resto */
+        font-family: inherit; /* Hereda la tipografía principal */
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Sutil sombra */
+        transition: background-color 0.3s, box-shadow 0.3s; /* Transiciones suaves */
+    }
+    .button-share:hover {
+        background-color: #f8f8f8; /* Color más claro en hover */
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15); /* Más sombra en hover */
     }
     </style>
     """,
@@ -152,6 +178,57 @@ Solo escribí el texto que querés simplificar, hacé clic en "Generar resumen" 
             <p>{}</p>
         </div>
         '''.format(st.session_state.assistant_response),
+                    unsafe_allow_html=True)
+
+        # Botón para copiar el texto
+        components.html(f"""
+        <div style="display: flex; justify-content: center; margin-top: 20px; padding: 10px;">
+            <button onclick="navigator.clipboard.writeText(`{st.session_state.assistant_response}`)" 
+                    style="background-color: #ffffff; 
+                           border: 1px solid #d1d1d1; 
+                           border-radius: 5px; 
+                           color: #333; 
+                           padding: 10px 20px; 
+                           font-size: 0.9em; 
+                           cursor: pointer;
+                           text-align: center; 
+                           box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+                           transition: background-color 0.3s, box-shadow 0.3s;
+                           width: auto; /* Aseguramos que el botón tenga el ancho adecuado */
+                           max-width: 100%; /* Evitamos que se expanda demasiado */
+                           white-space: nowrap;
+                           hover:
+                           background-color: #f8f8f8; /* Color más claro en hover */
+                           box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);">
+                Copiar resumen
+            </button>
+        </div>
+        """,
+                        height=70)
+
+        # Crear enlaces para compartir
+        encoded_text = urllib.parse.quote(
+            f"¡Mirá el resumen generado con Boletín Oficial Simple! 📝\n\n{st.session_state.assistant_response}"
+        )
+
+        twitter_url = f"https://twitter.com/intent/tweet?text={encoded_text}"
+        whatsapp_url = f"https://api.whatsapp.com/send?text={encoded_text}"
+        linkedin_url = "https://www.linkedin.com/sharing/share-offsite/?url=https://bo-simple.streamlit.app"
+
+        # Botones para compartir
+        st.markdown(f"""
+        <div class="share-container">
+            <a href="{twitter_url}" target="_blank">
+                <div class="button-share">Compartir en Twitter</div>
+            </a>
+            <a href="{linkedin_url}" target="_blank">
+                <div class="button-share">Compartir en LinkedIn</div>
+            </a>
+            <a href="{whatsapp_url}" target="_blank">
+                <div class="button-share">Compartir en WhatsApp</div>
+            </a>
+        </div>
+        """,
                     unsafe_allow_html=True)
 
 # Pie de página
